@@ -1,0 +1,23 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: gitops-root
+  namespace: flux-system
+spec:
+  interval: 5m
+  url: oci://registry.registry.svc.cluster.local:5000/gitops-root
+  ref:
+    tag: dev
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: gitops-root
+  namespace: flux-system
+spec:
+  interval: 10m
+  sourceRef:
+    kind: OCIRepository
+    name: gitops-root
+  path: ./dev
+  prune: true
