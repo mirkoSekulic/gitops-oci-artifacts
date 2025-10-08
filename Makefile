@@ -14,7 +14,7 @@ registry-install:
 
 .PHONY: flux-install
 flux-install:
-	flux install
+	kubectl apply -f infrastructure/flux-install.yaml
 
 .PHONY: apply
 apply:
