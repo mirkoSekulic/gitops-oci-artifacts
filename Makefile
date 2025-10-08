@@ -27,6 +27,13 @@ push-gitops:
 		--source="$$(git config --get remote.origin.url)" \
 		--revision="$$(git branch --show-current)/$$(git rev-parse HEAD)"
 
+.PHONY: push-dummy-service
+push-dummy-service:
+	flux push artifact oci://localhost:5000/dummy-service:dev \
+		--path=./dummy-service \
+		--source="$$(git config --get remote.origin.url)" \
+		--revision="$$(git branch --show-current)/$$(git rev-parse HEAD)"
+
 .PHONY: registry-port-forward
 registry-port-forward:
 	kubectl port-forward -n registry svc/registry 5000:5000 > /tmp/registry-pf.log 2>&1 & echo $$! > /tmp/registry-pf.pid
@@ -38,12 +45,12 @@ stop-port-forward:
 .PHONY: setup
 setup: kind-create registry-install
 	@echo "Waiting for registry pod to be created..."
-	@sleep 5
+	@sleep 10
 	@echo "Waiting for registry to be ready..."
 	kubectl wait --for=condition=ready pod -l app=registry -n registry --timeout=120s
 	@echo "Starting port-forward in background..."
 	$(MAKE) registry-port-forward
-	@sleep 3
+	@sleep 5
 	@echo "Pushing gitops-root to registry..."
 	$(MAKE) push-gitops
 	@echo "Installing Flux..."
