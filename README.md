@@ -2,7 +2,9 @@
 
 Demonstrates how to configure GitOps using OCI artifacts with Flux. All cluster deployments are managed from a single source of truth stored as OCI images in a registry.
 
-## Architecture
+## Architecture Overview
+
+![Architecture Diagram](diagrams/architecture.excalidraw.svg)
 
 **Registry**: For this demo, a registry runs in-cluster. In production, use a cloud provider registry (ACR, ECR, GCR, etc.).
 
