@@ -1,0 +1,23 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  name: generic-webhook
+  namespace: flux-system
+spec:
+  type: generic
+  address: http://webhook-logger.apps.svc.cluster.local
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Alert
+metadata:
+  name: all-events
+  namespace: flux-system
+spec:
+  providerRef:
+    name: generic-webhook
+  eventSeverity: info
+  eventSources:
+  - kind: Kustomization
+    name: '*'
+  - kind: OCIRepository
+    name: '*'
