@@ -8,16 +8,13 @@ kind-create:
 kind-delete:
 	kind delete cluster --name $(CLUSTER_NAME)
 
-.PHONY: registry-install
-registry-install:
+.PHONY: infrastructure-apply
+infrastructure-apply:
 	kubectl apply -f infrastructure/registry.yaml
-
-.PHONY: flux-install
-flux-install:
+	kubectl wait --for=condition=available --timeout=120s deployment/registry -n registry
+	kubectl wait --for=condition=ready --timeout=120s pod -l app=registry -n registry
 	kubectl apply -f infrastructure/flux-install.yaml
-
-.PHONY: apply
-apply:
+	kubectl wait --for condition=established --timeout=60s crd/kustomizations.kustomize.toolkit.fluxcd.io crd/ocirepositories.source.toolkit.fluxcd.io
 	kubectl apply -f infrastructure/flux-bootstrap.yaml
 
 .PHONY: push-gitops
@@ -43,18 +40,10 @@ stop-port-forward:
 	@if [ -f /tmp/registry-pf.pid ]; then kill $$(cat /tmp/registry-pf.pid) 2>/dev/null || true; rm /tmp/registry-pf.pid; echo "Port-forward stopped"; else echo "No port-forward running"; fi
 
 .PHONY: setup
-setup: kind-create registry-install
-	@echo "Waiting for registry pod to be created..."
-	@sleep 10
-	@echo "Waiting for registry to be ready..."
-	kubectl wait --for=condition=ready pod -l app=registry -n registry --timeout=120s
+setup: kind-create infrastructure-apply
 	@echo "Starting port-forward in background..."
 	$(MAKE) registry-port-forward
 	@sleep 5
 	@echo "Pushing gitops-root to registry..."
 	$(MAKE) push-gitops
-	@echo "Installing Flux..."
-	$(MAKE) flux-install
-	@echo "Applying Flux OCI configuration..."
-	$(MAKE) apply
 	@echo "Setup complete! Run 'make stop-port-forward' to stop the registry port-forward."
