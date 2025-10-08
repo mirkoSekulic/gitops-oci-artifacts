@@ -10,7 +10,7 @@ kind-delete:
 
 .PHONY: registry-install
 registry-install:
-	kubectl apply -f registry.yaml
+	kubectl apply -f infrastructure/registry.yaml
 
 .PHONY: flux-install
 flux-install:
@@ -18,19 +18,19 @@ flux-install:
 
 .PHONY: apply
 apply:
-	kubectl apply -f flux-oci.yaml
+	kubectl apply -f infrastructure/flux-bootstrap.yaml
 
 .PHONY: push-gitops
 push-gitops:
 	flux push artifact oci://localhost:5000/gitops-root:dev \
-		--path=./gitops-root \
+		--path=./oci-artifacts/gitops-root \
 		--source="$$(git config --get remote.origin.url)" \
 		--revision="$$(git branch --show-current)/$$(git rev-parse HEAD)"
 
 .PHONY: push-dummy-service
 push-dummy-service:
 	flux push artifact oci://localhost:5000/dummy-service:dev \
-		--path=./dummy-service \
+		--path=./oci-artifacts/dummy-service \
 		--source="$$(git config --get remote.origin.url)" \
 		--revision="$$(git branch --show-current)/$$(git rev-parse HEAD)"
 
