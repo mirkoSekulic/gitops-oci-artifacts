@@ -26,10 +26,7 @@ Demonstrates how to configure GitOps using OCI artifacts with Flux. All cluster 
    ```bash
    make push-dummy-service
    ```
-   Flux automatically reconciles and deploys the service. Test notifications by checking webhook-logger logs:
-   ```bash
-   kubectl logs -n flux-system -l app=webhook-logger -f
-   ```
+   Flux automatically reconciles and deploys the service. Test notifications by checking webhook-logger logs.
 
 3. **Cleanup**:
    ```bash
