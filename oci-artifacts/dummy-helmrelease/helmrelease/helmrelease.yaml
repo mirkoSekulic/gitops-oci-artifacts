@@ -1,0 +1,26 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: dummy-helmrelease
+  namespace: flux-system
+  labels:
+    app.kubernetes.io/managed-by: flux
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: dummy-helmrelease
+      version: '__VERSION__'
+      sourceRef:
+        kind: HelmRepository
+        name: dummy-helmrelease
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    replicaCount: 1

@@ -1,4 +1,5 @@
 CLUSTER_NAME ?= gitops-oci
+DUMMY_HELM_VERSION ?= 0.1.0
 
 .PHONY: kind-create
 kind-create:
@@ -30,6 +31,25 @@ push-dummy-service:
 		--path=./oci-artifacts/dummy-service \
 		--source="$$(git config --get remote.origin.url)" \
 		--revision="$$(git branch --show-current)/$$(git rev-parse HEAD)"
+
+.PHONY: push-helm-chart
+push-helm-chart:
+	helm package ./oci-artifacts/dummy-helmrelease/helm-chart -d /tmp --version $(DUMMY_HELM_VERSION)
+	helm push /tmp/dummy-helmrelease-$(DUMMY_HELM_VERSION).tgz oci://localhost:5000/helm-charts
+	rm /tmp/dummy-helmrelease-$(DUMMY_HELM_VERSION).tgz
+
+.PHONY: push-helmrelease-manifest
+push-helmrelease-manifest:
+	mkdir -p /tmp/dummy-helmrelease-manifest
+	sed 's/__VERSION__/$(DUMMY_HELM_VERSION)/g' ./oci-artifacts/dummy-helmrelease/helmrelease/helmrelease.yaml > /tmp/dummy-helmrelease-manifest/helmrelease.yaml
+	flux push artifact oci://localhost:5000/dummy-helmrelease:dev \
+		--path=/tmp/dummy-helmrelease-manifest \
+		--source="$$(git config --get remote.origin.url)" \
+		--revision="$$(git branch --show-current)/$$(git rev-parse HEAD)"
+	rm -rf /tmp/dummy-helmrelease-manifest
+
+.PHONY: push-dummy-helmrelease
+push-dummy-helmrelease: push-helm-chart push-helmrelease-manifest
 
 .PHONY: registry-port-forward
 registry-port-forward:

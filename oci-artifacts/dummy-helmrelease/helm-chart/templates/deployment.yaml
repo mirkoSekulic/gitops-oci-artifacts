@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: apps
+  labels:
+    app: {{ .Chart.Name }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+        {{- range .Values.args }}
+        - {{ . | quote }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.targetPort }}
+          protocol: TCP
+        {{- if .Values.healthcheck.liveness.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.healthcheck.liveness.httpGet.path }}
+            port: {{ .Values.healthcheck.liveness.httpGet.port }}
+          initialDelaySeconds: {{ .Values.healthcheck.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthcheck.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthcheck.liveness.timeoutSeconds }}
+          failureThreshold: {{ .Values.healthcheck.liveness.failureThreshold }}
+        {{- end }}
+        {{- if .Values.healthcheck.readiness.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthcheck.readiness.httpGet.path }}
+            port: {{ .Values.healthcheck.readiness.httpGet.port }}
+          initialDelaySeconds: {{ .Values.healthcheck.readiness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthcheck.readiness.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthcheck.readiness.timeoutSeconds }}
+          failureThreshold: {{ .Values.healthcheck.readiness.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

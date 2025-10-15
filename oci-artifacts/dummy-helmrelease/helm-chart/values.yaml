@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: hashicorp/http-echo
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5678
+
+args:
+  - "-text=Hello from dummy-helmrelease API"
+
+healthcheck:
+  liveness:
+    enabled: true
+    httpGet:
+      path: /
+      port: 5678
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+  readiness:
+    enabled: true
+    httpGet:
+      path: /
+      port: 5678
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi

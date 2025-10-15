@@ -4,3 +4,4 @@ resources:
   - apps-namespace.yaml
   - webhook-logger.yaml
   - flux-notifications.yaml
+  - helm-repository.yaml
