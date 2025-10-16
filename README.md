@@ -4,7 +4,7 @@ Demonstrates how to configure GitOps using OCI artifacts with Flux. All cluster 
 
 ## Architecture Overview
 
-![Architecture Diagram](diagrams/architecture.excalidraw.svg)
+[View Architecture Diagram](diagrams/gitops-workflow.mmd)
 
 **Registry**: For this demo, a registry runs in-cluster. In production, use a cloud provider registry (ACR, ECR, GCR, etc.).
 

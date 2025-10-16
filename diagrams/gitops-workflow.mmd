@@ -1,0 +1,44 @@
+graph TB
+    subgraph cluster["K8s Cluster"]
+        subgraph registry["registry namespace"]
+            subgraph reg["registry"]
+                gr1((gitops-root))
+                ds1((dummy-service))
+                dhr1((dummy-helmrelease))
+                dhc1((dummy-helmchart))
+                gr1 -->|references| ds1
+                gr1 -->|references| dhr1
+                dhr1 -->|references| dhc1
+            end
+        end
+
+        subgraph flux["flux-system namespace"]
+            fc[flux controllers]
+            groci[gitops-root oci repo]
+            grk[gitops-root kustomization]
+            dsoci[dummy-service oci repo]
+            dsk[dummy-service kustomization]
+            dhc[dummy-helmrelease helmchart]
+            dhr[dummy-helmrelease helmrelease]
+
+            fc -->|watches| gr1
+            fc -->|updates| groci
+            fc -->|updates| grk
+            grk -->|creates| dsoci
+            grk -->|creates| dsk
+            grk -->|creates| dhc
+            grk -->|creates| dhr
+        end
+
+        subgraph apps["apps namespace"]
+            ds[dummy-service]
+            wl[webhook-logger]
+            dhrs[dummy-helmrelease-service]
+        end
+
+        grk -->|creates| apps
+        grk -->|deploys| wl
+        dsk -->|deploys| ds
+        dhr -->|deploys| dhrs
+        fc -->|notifies| wl
+    end
